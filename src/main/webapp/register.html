@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Registration Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #e6f0ff; /* Light blue background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 30px 40px;
+            width: 350px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,255,0.2);
+            border-top: 6px solid #1a73e8;
+        }
+
+        h2 {
+            text-align: center;
+            color: #1a73e8;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #a3c4ff;
+            border-radius: 5px;
+            font-size: 15px;
+        }
+
+        input[type="submit"] {
+            width: 100%;
+            background: #1a73e8;
+            color: white;
+            padding: 10px;
+            border: none;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        input[type="submit"]:hover {
+            background: #0f57c4;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Registration Page</h2>
+
+        <form action="register" method="post">
+            Name:
+            <input type="text" name="name" required>
+
+            Email:
+            <input type="email" name="email" required>
+
+            Password:
+            <input type="password" name="password" required>
+
+            <input type="submit" value="Register">
+        </form>
+    </div>
+</body>
+</html>

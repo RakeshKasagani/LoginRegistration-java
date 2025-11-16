@@ -7,7 +7,7 @@
     <groupId>com.shiva</groupId>
     <artifactId>LoginRegistration</artifactId>
     <packaging>war</packaging>
-    <version>1.2.5</version>
+    <version>1.2.8</version>
     <name>LoginRegistration Maven Webapp</name>
     <url>http://maven.apache.org</url>
 
@@ -57,6 +57,7 @@
     <id>nexus-snapshots</id>
     <url>http://13.60.221.184:8081/repository/maven-snapshots/</url>
   </snapshotRepository>
+                  
 </distributionManagement>
 
 </project>

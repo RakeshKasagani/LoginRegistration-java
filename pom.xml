@@ -7,8 +7,8 @@
     <groupId>com.shiva</groupId>
     <artifactId>LoginRegistration</artifactId>
     <packaging>war</packaging>
-    <version>1.2.6</version>
-    <name>LoginRegistration Maven Webapp</name>
+    <version>1.2.5</version>
+    <name>LoginRegistration</name>
     <url>http://maven.apache.org</url>
 
     <!-- ⭐ Add Java 17 here -->

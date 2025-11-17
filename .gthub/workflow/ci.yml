@@ -1,1 +1,130 @@
+name: CI Pipeline
+
+# Run on push and also allow manual runs
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  # keep same URLs as in your Jenkinsfile
+  SONARQUBE_URL: 'http://16.171.28.129:9000/'
+  NEXUS_URL:     'http://16.171.28.129:8081/'
+  DOCKER_IMAGE:  'rakesh268/loginregistration'
+  VERSION:       ${{ github.run_number }}     # similar to BUILD_NUMBER in Jenkins
+
+jobs:
+  build-and-test:
+    name: Build & Test (Maven)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java (Maven)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+          cache: 'maven'
+
+      - name: Cache Sonar (optional)
+        uses: actions/cache@v4
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+
+      - name: Build with Maven
+        run: mvn -B clean package
+
+      - name: Upload surefire reports (test results)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: '**/target/surefire-reports/*.xml'
+
+  sonar-analysis:
+    name: SonarQube Analysis
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java (Maven)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+          cache: 'maven'
+
+      - name: Run SonarQube analysis
+        env:
+          SONAR_HOST_URL: ${{ env.SONARQUBE_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          mvn sonar:sonar \
+            -Dsonar.projectKey=LoginRegistration-java \
+            -Dsonar.host.url=${SONAR_HOST_URL} \
+            -Dsonar.login=${SONAR_TOKEN}
+
+  upload-to-nexus:
+    name: Upload to Nexus
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java (Maven)
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+          cache: 'maven'
+
+      - name: Create Maven settings.xml with Nexus credentials
+        env:
+          NEXUS_USER: ${{ secrets.NEXUS_USER }}
+          NEXUS_PASS: ${{ secrets.NEXUS_PASS }}
+        run: |
+          cat > settings.xml <<EOF
+          <settings>
+            <servers>
+              <server>
+                <id>nexus</id>
+                <username>${NEXUS_USER}</username>
+                <password>${NEXUS_PASS}</password>
+              </server>
+            </servers>
+          </settings>
+          EOF
+
+      - name: Deploy artifact to Nexus
+        run: mvn -B deploy -DskipTests -s settings.xml
+
+  docker-build-and-push:
+    name: Build Docker image and push to Docker Hub
+    runs-on: ubuntu-latest
+    needs: [build-and-test]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Build and push Docker image (tagged with run number + latest)
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.DOCKER_IMAGE }}:${{ env.VERSION }}
+            ${{ env.DOCKER_IMAGE }}:latest
 
